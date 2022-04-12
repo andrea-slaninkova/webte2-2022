@@ -1,102 +1,310 @@
+<!-- andrea slaninkova 92209 -->
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+/*ini_set('display_errors', 1);
+error_reporting(E_ALL);*/
 ?>
 <?php
-// Read the JSON file
-$json = file_get_contents('./storage/restaurant1.json');
+require_once 'restaurant1.php';
+require_once 'restaurant2.php';
+require_once 'restaurant3.php';
 
-// Decode the JSON file
-$json_data = json_decode($json,true);
-var_dump($json_data['data']);
-
-    $foods = $json_data['data'];
-if($foods){
-    $interval = date_diff( DateTime::createFromFormat( 'U', $json_data['timestamp'] ), new DateTime());
-    $timeDifference = (new DateTime())->getTimestamp() - $json_data['timestamp'];
-// printing result in days format
-    echo $interval->format('%r%h:%i:%s');
-    echo "<br>";
-    echo  $timeDifference;
-}else{
-    $timeDifference = 0;
+//var_dump($foods);
+//var_dump($jedla);
+$den = "tyzden";
+if(isset($_POST['pondelok'])){
+    $den = "Pondelok";
+}else if(isset($_POST['utorok'])){
+    $den = "Utorok";
+}else if(isset($_POST['streda'])){
+    $den = "Streda";
+}else if(isset($_POST['stvrtok'])){
+    $den = "Štvrtok";
+}else if(isset($_POST['piatok'])){
+    $den = "Piatok";
+}else if(isset($_POST['sobota'])){
+    $den = "Sobota";
+}else if(isset($_POST['nedela'])){
+    $den = "Nedeľa";
+}else if(isset($_POST['tyzden'])){
+    $den = "tyzden";
 }
 
+//var_dump($den);
+
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Webte2 Andrea Slaninková</title>
+    <meta charset="utf-8">
+    <link rel="icon" href="images/list.png" type="image/gif" sizes="16x16">
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- navbar and table-->
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.23/datatables.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.23/datatables.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 
+</head>
+<body>
 
-if($timeDifference > 800 or $timeDifference == 0) {
-    $ch = curl_init();
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    <ul class="navbar-nav">
+        <li class="nav-item active">
+            <a class="nav-link" href="index.php">Zadanie 4</a></li>
 
-// set url
-    curl_setopt($ch, CURLOPT_URL, "https://www.delikanti.sk/prevadzky/3-jedalen-prif-uk/");
+    </ul>
 
-//return the transfer as a string
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+</nav>
 
-// $output contains the output string
-    $output = curl_exec($ch);
+<div class="dni" style="margin: auto; width: 50% !important">
 
-// close curl resource to free up system resources
-    curl_close($ch);
+    <form action="index.php" method="post">
+        <input type="submit" name="pondelok" value="Pondelok">
+        <input type="submit" name="utorok" value="Utorok">
+        <input type="submit" name="streda" value="Streda">
+        <input type="submit" name="stvrtok" value="Štvrtok">
+        <input type="submit" name="piatok" value="Piatok">
+        <input type="submit" name="sobota" value="Sobota">
+        <input type="submit" name="nedela" value="Nedeľa">
+        <input type="submit" name="tyzden" value="Týždeň"> </form>
+</div>
 
-    $dom = new DOMDocument();
-
-    @$dom->loadHTML($output);
-    $dom->preserveWhiteSpace = false;
-    $tables = $dom->getElementsByTagName('table');
-
-    $rows = $tables->item(0)->getElementsByTagName('tr');
-    $index = 0;
-    $dayCount = 0;
-
-    $foods = [];
-    $foodCount = $rows->item(0)->getElementsByTagName('th')->item(0)->getAttribute('rowspan');
-
-    foreach ($rows as $row) {
-
-        if($row->getElementsByTagName('th')->item(0)){
-            $foodCount = $row->getElementsByTagName('th')->item(0)->getAttribute('rowspan');
-
-            $day = trim($rows->item($index)->getElementsByTagName('th')->item(0)->getElementsByTagName('strong')->item(0)->nodeValue);
-
-            $th = $rows->item($index)->getElementsByTagName('th')->item(0);
-
-            foreach($th->childNodes as $node)
-                if(!($node instanceof \DomText))
-                    $node->parentNode->removeChild($node);
-
-            $date = trim($rows->item($index)->getElementsByTagName('th')->item(0)->nodeValue);
+<div class="content">
 
 
-            array_push($foods, ["date" => $date, "day" => $day, "menu" => []]);
+    <div class="table-container">
 
-            for($i = $index; $i <  $index + intval($foodCount); $i++)
-            {
-                if($foods[$dayCount])
-                    array_push($foods[$dayCount]["menu"], trim($rows->item($i)->getElementsByTagName('td')->item(1)->nodeValue));
+        <table id="tbstyle" class="table">
+            <th style="text-align: left" >
+            <?php
+            foreach ($jedla as $jedlo) {
+
+                if($jedlo['day'] == "Pondelok"){
+                    echo '' . $jedlo['date'];
+                    echo ' - ';
+                }
+                if($jedlo['day'] == "Nedeľa"){
+                    echo '' . $jedlo['date'];
+                }
             }
-            $index += intval($foodCount);
-            $dayCount++;
-        }
+            ?>
 
-    }
+            </th>
+            <tbody>
 
-    $data = ["timestamp" => (new DateTime())->getTimestamp(), "data" => $foods];
+            <div class="restaurant1">
+
+            <?php
+            if($den == "tyzden"){
+                ?>
+
+                 <tr>
+                        <td>Restauracia</td>
+                        <td>Pondelok</td>
+                        <td>Utorok</td>
+                        <td>Streda</td>
+                        <td>Štvrtok</td>
+                        <td>Piatok</td>
+                        <td>Sobota</td>
+                        <td>Nedeľa</td>
+
+                 </tr>
+                   <tr>
+                       <td>Delikanti PriF</td>
+                       <?php
+
+                       foreach ($foods as $food) {
+
+                           if($food['menu']){
+                               //var_dump(count($food['menu'])); ?>
+                               <td>  <?php
+                                   for($i = 0;  $i < sizeof($food['menu']); $i++){
+                                       if($food['menu'][$i]){
+                                           ?>
+                                           <?= $food['menu'][$i]; ?> <br>
+                                           <?php
+                                       }
+                                   }
+                                   ?> </td>  <?php
+                           }
+                       }
+                       ?> </tr> <?php
+
+            }else{
+                ?>
+                <tr>
+                    <td>Restauracia</td>
+                    <td> <?= $den; ?> </td>
+
+                </tr>
+                <tr>
+                    <td>Delikanti PriF</td>
+
+                <?php
+
+                foreach ($foods as $food) {
+                    if($food['day'] == $den){
+
+                        if($food['menu']){
+                            //var_dump(count($food['menu'])); ?>
+                            <td>  <?php
+                                for($i = 0;  $i < sizeof($food['menu']); $i++){
+                                    if($food['menu'][$i]){
+                                        ?>
+                                        <?= $food['menu'][$i]; ?> <br>
+                                        <?php
+                                    }
+                                }
+                                ?> </td>  <?php
+                        }
+                    }
+                }
+                ?>  </tr>  <?php
+
+            }
+            ?>
+
+            </div>
+
+            <div class="restaurant2">
+                <?php
+            if($den == "tyzden"){  ?>
+
+                <tr>
+                    <td>Eat&Meet</td>
+                    <?php
+
+                    foreach ($jedla as $jedlo) {
+
+                        if($jedlo['menu']){
+                            //var_dump(count($jedlo['menu'])); ?>
+                            <td>  <?php
+                                for($i = 0;  $i < sizeof($jedlo['menu']); $i++){
+                                    if($jedlo['menu'][$i]){
+                                        ?>
+                                        <?= $jedlo['menu'][$i]; ?> <br>
+                                        <?php
+                                    }
+                                }
+                                ?> </td>  <?php
+                        }
+                    }
+                    ?> </tr> <?php
+            }else{
+                ?>
+
+                <tr>
+                    <td>Eat&Meet</td>
+                    <?php
+
+                foreach ($jedla as $jedlo) {
+                    if($jedlo['day'] == $den){
+
+                        if($jedlo['menu']){
+                            //var_dump(count($food['menu'])); ?>
+                            <td>  <?php
+                                for($i = 0;  $i < sizeof($jedlo['menu']); $i++){
+                                    if($jedlo['menu'][$i]){
+                                        ?>
+                                        <?= $jedlo['menu'][$i]; ?> <br>
+                                        <?php
+                                    }
+                                }
+                                ?> </td>  <?php
+                        }
+                    }
+                }
+                ?> </tr> <?php
+
+            }
+
+            ?>
+             </div>
+
+
+            <div class="restaurant3">
+                <?php
+                if($den == "tyzden"){  ?>
+
+                    <tr>
+                        <td>Free Food</td>
+                        <?php
+
+                        foreach ($jedla3 as $jedlo3) {
+
+                            if($jedlo3['menu']){
+                               // var_dump(count($jedlo3['menu'])); ?>
+                                <td>  <?php
+                                for($i = 0;  $i < sizeof($jedlo3['menu']); $i++){
+                                    if($jedlo3['menu'][$i]){
+                                ?>
+                                    <?= $jedlo3['menu'][$i]; ?> <br>
+                                <?php
+                                    }
+                                }
+                               ?> </td>  <?php
+                            }
+                        }
+                        ?> </tr> <?php
+                }else{
+                    ?>
+
+                    <tr>
+                        <td>Free Food</td>
+                        <?php
+
+                        foreach ($jedla3 as $jedlo3) {
+                            if($den == "Štvrtok"){
+                                $den = "štvrtok";
+                            }else{
+                                $den = strtolower($den);
+                            }
+                            if($jedlo3['day'] == $den ){
+
+                                if($jedlo3['menu']){
+                                    //var_dump(count($food['menu'])); ?>
+                                    <td>  <?php
+                                        for($i = 0;  $i < sizeof($jedlo3['menu']); $i++){
+                                            if($jedlo3['menu'][$i]){
+                                                ?>
+                                                <?= $jedlo3['menu'][$i]; ?> <br>
+                                                <?php
+                                            }
+                                        }
+                                        ?> </td>  <?php
+                                }
+                            }
+                        }
+                        ?> </tr> <?php
+
+                }
+
+                ?>
+            </div>
+
+
+            </tbody>
+        </table>
+    </div>
 
 
 
-    $fp = fopen('./storage/restaurant1.json', 'w');
-    fwrite($fp, json_encode($data));
-    fclose($fp);
-}
+</div>
 
-echo "<pre>";
-var_dump($foods);
-echo "</pre>";
+</body>
+</html>
 
 
 
 
-//// Display data
-//print_r($json_data);
+
+

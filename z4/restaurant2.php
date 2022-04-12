@@ -1,7 +1,7 @@
 
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+/*ini_set('display_errors', 1);
+error_reporting(E_ALL);*/
 ?>
 <?php
 // Read the JSON file
@@ -9,16 +9,16 @@ $json = file_get_contents('./storage/restaurant2.json');
 
 // Decode the JSON file
 $json_data = json_decode($json,true);
-var_dump($json_data['data']);
+//var_dump($json_data['data']);
 
 $jedla = $json_data['data'];
 if($jedla){
     $interval = date_diff( DateTime::createFromFormat( 'U', $json_data['timestamp'] ), new DateTime());
     $timeDifference = (new DateTime())->getTimestamp() - $json_data['timestamp'];
 // printing result in days format
-    echo $interval->format('%r%h:%i:%s');
-    echo "<br>";
-    echo  $timeDifference;
+   // echo $interval->format('%r%h:%i:%s');
+   // echo "<br>";
+    //echo  $timeDifference;
 }else{
     $timeDifference = 0;
 }
@@ -73,17 +73,17 @@ if($timeDifference > 800 or $timeDifference == 0) {
         }
     }
 
-    $data = ["timestamp" => (new DateTime())->getTimestamp(), "data" => $jedla];
+    $data2 = ["timestamp" => (new DateTime())->getTimestamp(), "data" => $jedla];
 
 
 
     $fp = fopen('./storage/restaurant2.json', 'w');
-    fwrite($fp, json_encode($data));
+    fwrite($fp, json_encode($data2));
     fclose($fp);
 
 }
 
 
-echo "<pre>";
-var_dump($jedla);
-echo "</pre>";
+//echo "<pre>";
+//var_dump($jedla);
+//echo "</pre>";
